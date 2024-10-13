@@ -316,3 +316,33 @@ impl FnType {
         }
     }
 }
+
+impl Condition {
+    fn format(&self, is_typed: bool) -> String {
+        match self {
+            Condition::Any(conditions) => {
+                let conditions = conditions
+                    .0
+                    .iter()
+                    .map(|c| c.format(is_typed))
+                    .collect::<Vec<_>>();
+                conditions.join(" || ")
+            }
+            Condition::All(conditions) => {
+                let conditions = conditions
+                    .0
+                    .iter()
+                    .map(|c| c.format(is_typed))
+                    .collect::<Vec<_>>();
+                conditions.join(" && ")
+            }
+            Condition::Expr(expr) => expr.to_token_stream().to_string(),
+            Condition::Value(lit_str) => format!(
+                "hasGrant({}{}{})",
+                if !is_typed { "\"" } else { "" },
+                lit_str.value(),
+                if !is_typed { "\"" } else { "" }
+            ),
+        }
+    }
+}
