@@ -22,9 +22,11 @@
 pub mod authorities;
 mod guards;
 mod middleware;
+mod config;
 
 pub use guards::AuthorityGuard;
 pub use middleware::GrantsMiddleware;
+pub use config::{GrantErrorConfig, GrantsConfig};
 
 /// Procedural macros for checking user authorities (permissions or roles).
 ///
