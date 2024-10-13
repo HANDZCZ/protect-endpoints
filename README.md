@@ -1,7 +1,9 @@
 # Collection of crates to protect your endpoints
 
-[![dependency status](https://deps.rs/repo/github/DDtKey/protect-endpoints/status.svg)](https://deps.rs/repo/github/DDtKey/protect-endpoints)
-[![CI](https://github.com/DDtKey/protect-endpoints/workflows/CI/badge.svg)](https://github.com/DDtKey/protect-endpoints/actions)
+Original repo can be found at: <https://github.com/DDtKey/protect-endpoints>
+
+[![dependency status](https://deps.rs/repo/github/HANDZCZ/protect-endpoints/status.svg)](https://deps.rs/repo/github/HANDZCZ/protect-endpoints)
+<!--[![CI](https://github.com/DDtKey/protect-endpoints/workflows/CI/badge.svg)](https://github.com/DDtKey/protect-endpoints/actions)-->
 
 > Extension for [`actix-web`], [`rocket`], [`poem`], [`axum`] and [`salvo`] to authorize requests.
 

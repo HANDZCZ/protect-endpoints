@@ -15,9 +15,9 @@ edition = "2021"
 rust-version = "1.56"
 license = "MIT OR Apache-2.0"
 categories = ["authentication"]
-homepage = "https://github.com/DDtKey/protect-endpoints"
-repository = "https://github.com/DDtKey/protect-endpoints"
-authors = ["DDtKey <ddttkey@gmail.com>"]
+homepage = "https://github.com/HANDZCZ/protect-endpoints"
+repository = "https://github.com/HANDZCZ/protect-endpoints"
+authors = ["DDtKey <ddttkey@gmail.com>", "HANDZCZ <handz@email.cz>"]
 
 [workspace.dependencies]
 protect-endpoints-proc-macro = { path = "proc-macro", version = "0.3.2" }
