@@ -26,6 +26,9 @@ impl ProtectEndpoint {
         let auth_details = format!("_auth_details_{}", fn_args.len());
         let auth_details: Ident = Ident::new(&auth_details, Span::call_site());
 
+        let req = format!("_req_{}", fn_args.len());
+        let req: Ident = Ident::new(&req, Span::call_site());
+
         let ty = self
             .args
             .ty
@@ -33,22 +36,43 @@ impl ProtectEndpoint {
             .map(ToTokens::to_token_stream)
             .unwrap_or(quote! {String});
 
-        let condition = self
-            .args
-            .cond
-            .to_tokens(&auth_details, self.args.ty.is_some());
+        let is_typed = self.args.ty.is_some();
+        let condition = self.args.cond.to_tokens(&auth_details, is_typed);
         let condition = quote!(if #condition);
 
-        let err_resp = if let Some(expr) = &self.args.error_fn {
-            quote!(#expr())
+        let (err_resp, req) = if let Some(expr) = &self.args.error_fn {
+            (quote!(#expr()), quote!())
         } else {
-            quote!(actix_web::HttpResponse::Forbidden().finish())
+            let formatted_condition = self.args.cond.format(is_typed);
+            (
+                quote!({
+                    let condition = #formatted_condition;
+                    let err_handler = #req
+                        .app_data::<actix_web_grants::GrantErrorConfig<#ty>>()
+                        .and_then(|c| c.err_handler.clone());
+                    if let Some(err_handler) = err_handler {
+                        (err_handler)(condition, &*#auth_details.authorities)
+                    } else {
+                        let err_handler = #req
+                            .app_data::<actix_web_grants::GrantsConfig>()
+                            .and_then(|c| c.err_handler.clone());
+                        if let Some(err_handler) = err_handler {
+                            let authorities = #auth_details.authorities.iter().map(|a| a as &dyn std::any::Any).collect::<Vec<_>>();
+                            (err_handler)(condition, authorities.as_slice())
+                        } else {
+                            actix_web::HttpResponse::Forbidden().finish()
+                        }
+                    }
+                }),
+                quote!(#req: actix_web::HttpRequest,),
+            )
         };
 
         let stream = quote! {
             #(#fn_attrs)*
             #func_vis #fn_async fn #fn_name #fn_generics(
                 #auth_details: actix_web_grants::authorities::AuthDetails<#ty>,
+                #req
                 #fn_args
             ) -> actix_web::Either<#fn_output, actix_web::HttpResponse> {
                 use actix_web_grants::authorities::AuthoritiesCheck;
