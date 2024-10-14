@@ -55,7 +55,7 @@ impl ProtectEndpoint {
                     } else {
                         let err_handler = #req
                             .app_data::<actix_web_grants::GrantsConfig>()
-                            .and_then(|c| c.err_handler.clone());
+                            .and_then(|c| c.grants_err_handler.clone());
                         if let Some(err_handler) = err_handler {
                             let authorities = #auth_details.authorities.iter().map(|a| a as &dyn std::any::Any).collect::<Vec<_>>();
                             (err_handler)(condition, authorities.as_slice())
