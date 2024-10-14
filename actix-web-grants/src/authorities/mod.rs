@@ -28,6 +28,8 @@ mod extractors;
 pub use attache::AttachAuthorities;
 pub use extractors::*;
 
+use crate::GrantsConfig;
+
 pub struct AuthDetails<T = String>
 where
     T: Eq + Hash,
@@ -88,7 +90,12 @@ impl<T: Eq + Hash + 'static> FromRequest for AuthDetails<T> {
             req.extensions()
                 .get::<AuthDetails<T>>()
                 .cloned()
-                .ok_or_else(|| ErrorUnauthorized("User unauthorized!"))
+                .ok_or_else(|| {
+                    req.app_data::<GrantsConfig>()
+                        .and_then(|config| config.auth_details_err_handler.clone())
+                        .map(|err_handler| (err_handler)())
+                        .unwrap_or(ErrorUnauthorized("User unauthorized!"))
+                })
         })
     }
 }
