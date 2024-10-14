@@ -1,6 +1,6 @@
 use std::{any::Any, collections::HashSet, sync::Arc};
 
-use actix_web::HttpResponse;
+use actix_web::{Error, HttpResponse};
 
 /// Grants error config for specific grants type configuration
 ///
@@ -47,16 +47,27 @@ impl<T> GrantErrorConfig<T> {
 #[derive(Clone, Default)]
 pub struct GrantsConfig {
     #[allow(clippy::type_complexity)]
-    pub err_handler: Option<Arc<dyn Fn(&str, &[&dyn Any]) -> HttpResponse + Send + Sync>>,
+    pub grants_err_handler: Option<Arc<dyn Fn(&str, &[&dyn Any]) -> HttpResponse + Send + Sync>>,
+    #[allow(clippy::type_complexity)]
+    pub auth_details_err_handler: Option<Arc<dyn Fn() -> Error + Send + Sync>>,
 }
 
 impl GrantsConfig {
-    /// Set custom error handler.
-    pub fn default_error_handler<F>(mut self, f: F) -> Self
+    /// Set custom error handler for grants error.
+    pub fn default_grants_error_handler<F>(mut self, f: F) -> Self
     where
         F: Fn(&str, &[&dyn Any]) -> HttpResponse + Send + Sync + 'static,
     {
-        self.err_handler = Some(Arc::new(f));
+        self.grants_err_handler = Some(Arc::new(f));
+        self
+    }
+
+    /// Set custom error handler for missing [`AuthDetails`](crate::authorities::AuthDetails).
+    pub fn missing_auth_details_error_handler<F>(mut self, f: F) -> Self
+    where
+        F: Fn() -> Error + Send + Sync + 'static,
+    {
+        self.auth_details_err_handler = Some(Arc::new(f));
         self
     }
 }
